@@ -24,7 +24,7 @@ public class BossBattle extends JPanel implements Serializable {
 	private mainclass main;
 	private PressedKey keys = new PressedKey();
 	private Thread thread;
-	private Thread gamethread;
+	private Timer gamethread;
 	private ArrayList<Thread> threads = new ArrayList<>();
 	private ArrayList<Bullet> bulletlist = new ArrayList<>();
 	private static BossBattle instance;
@@ -38,48 +38,116 @@ public class BossBattle extends JPanel implements Serializable {
 	}
 	
 	public void start() {
-		bulletpattern3();
-		gamethread = new Thread(new Runnable() {
+		ArrayList<Timer> timerlist = new ArrayList<>();
+		gamethread = new Timer(5000,e -> {
+			Random r = new Random();
+			if(r.nextInt() <= 10) bulletpattern3();
+			//spawnbullet(new Point(350,150),3.0f,70.0f);
+			//spawnbullet(new Point(600,150),3.0f,70.0f);
+			//spawnbullet(new Point(100,150),3.0f,70.0f);
+			//spawnbullet2(new Point(350,200),5.0f,0);
+		});
+		
+		gamethread.setRepeats(true);
+		gamethread.setInitialDelay(0);
+		gamethread.start();
+	}
+	
+	public void bulletpattern(Point spawnpoint,Point spawnpoint1,Point spawnpoint2, double velocity, double angle) {
+		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				long time = 0L;
-				Random r = new Random();
 				while(true) {
-					int a = r.nextInt(100)+1;
-					System.out.println(a);
-					if(a >= 65) {
-						bulletpattern3();
+					for(int i = 0; i<360; i+=18) {
+						double newX = (double) (spawnpoint.x + 50 * Math.cos(Math.toRadians(i)));
+		                double newY = (double) (spawnpoint.y + 50 * Math.sin(Math.toRadians(i)));
+						Bullet2 e = new Bullet2(spawnpoint,7,i,0,0,"clockwise",0);
+						add(e);
+						e.repaint();
 					}
-					time++;
+					try {
+						Thread.sleep(50);
+					}catch(Exception e) {
+						e.printStackTrace();
+					}
 				}
 			}
-		});
-		//gamethread.start();
+		}).start();;
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				
+				while(true) {
+					ArrayList<Bullet> list = new ArrayList<>();
+					for(int i = 0; i<360; i+=12) {
+						double newX = (double) (spawnpoint1.x + 70 * Math.cos(Math.toRadians(i)));
+		                double newY = (double) (spawnpoint1.y + 70 * Math.sin(Math.toRadians(i)));
+		                Bullet e = new Bullet(new Point((int)newX,(int)newY),0,i,(double)new Random().nextInt(10));
+						add(e);
+						e.repaint();
+						list.add(e);
+					}
+					for(Bullet a : list) a.setVelocity(7);
+					try {
+						Thread.sleep(600);
+					}catch(Exception ea) {
+						ea.printStackTrace();
+					}
+				}
+			}
+		}).start();;
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				
+				while(true) {
+					ArrayList<Bullet> list = new ArrayList<>();
+					for(int i = 0; i<360; i+=12) {
+						double newX = (double) (spawnpoint2.x + 70 * Math.cos(Math.toRadians(i)));
+		                double newY = (double) (spawnpoint2.y + 70 * Math.sin(Math.toRadians(i)));
+						Bullet e = new Bullet(new Point((int)newX,(int)newY),0,i,(double)new Random().nextInt(10));
+						add(e);
+						e.repaint();
+						list.add(e);
+					}
+					for(Bullet a : list) a.setVelocity(7);
+					try {
+						Thread.sleep(600);
+					}catch(Exception ea) {
+						ea.printStackTrace();
+					}
+				}
+			}
+		}).start();;
 	}
 	
 	public void bulletpattern3() {
 		Point point = new Point(0,700);
+		ArrayList<Bullet> list = new ArrayList<>();
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
-				int[] angles = {297,72};
+				int[] angles = {297,62,210,0,150};
 				int cnt = 0;
 				while(true) {
 					if(point.x > 720 || point.y > 720 || point.x < 0 || point.y < 0) cnt++;
-					Bullet e = new Bullet(point);
+					if(cnt >= angles.length) break;
+					Bullet e = new Bullet(point,0.0f,new Random().nextInt(360));
 					add(e);
 					e.repaint();
+					list.add(e);
 					double newX = (double)(point.x + 30 * Math.cos(Math.toRadians(angles[cnt])));
 			        double newY = (double)(point.y + 30 * Math.sin(Math.toRadians(angles[cnt])));
 			        point.x = (int) newX;
 			        point.y = (int) newY;
 			        try {
-			        	Thread.sleep(30);
+			        	Thread.sleep(10);
 			        }
 			        catch(Exception ae) {
 			        	ae.printStackTrace();
 			        }
 				}
+				for(Bullet a : list) a.setVelocity(4); 
 			}
 		}).start();
 	}
@@ -214,10 +282,11 @@ public class BossBattle extends JPanel implements Serializable {
 					keys.setShift(true);
 					break;
 				case KeyEvent.VK_C:
-					spawnbullet(new Point(350,150),3.0f,70.0f);
-					spawnbullet(new Point(600,150),3.0f,70.0f);
-					spawnbullet(new Point(100,150),3.0f,70.0f);
-					spawnbullet2(new Point(350,200),5.0f,0);
+//					spawnbullet(new Point(350,150),3.0f,70.0f);
+//					spawnbullet(new Point(600,150),3.0f,70.0f);
+//					spawnbullet(new Point(100,150),3.0f,70.0f);
+//					spawnbullet2(new Point(350,200),5.0f,0);
+					bulletpattern(new Point(350,200),new Point(100,250),new Point(600,250),5.0f,0);
 					break;
 				case KeyEvent.VK_X:
 					for(Thread a : threads)
@@ -371,6 +440,7 @@ class PressedKey {
 class Bullet extends Object_BulletHell {
 	private double velocity = 0.0f;
 	private double angle = 0.0f;
+	private long delay = 0;
 	private Thread thread;
 	public Bullet(Point p, double velocity, double angle, int offset) {
 		super(p,new Ellipse2D.Double(p.x,p.y,15.0f,15.0f));
@@ -387,9 +457,54 @@ class Bullet extends Object_BulletHell {
 		move(offset);
 	}
 	
-	public Bullet(Point p) {
+	public Bullet(Point p, double velocity, double angle, int offset, float width, float height) {
 		super(p,new Ellipse2D.Double(p.x,p.y,15.0f,15.0f));
-		
+		this.velocity = velocity;
+		this.angle = angle;
+		try {
+			//setImg(ImageIO.read(new File("OyfMt1v.png")));
+			setImg(ImageIO.read(new File("bullet.png")));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		repaint();
+		move(offset);
+	}
+	
+	public Bullet(Point p, double velocity, double angle) {
+		super(p,new Ellipse2D.Double(p.x,p.y,15.0f,15.0f));
+		this.velocity = velocity;
+		this.angle = angle;
+		try {
+			//setImg(ImageIO.read(new File("OyfMt1v.png")));
+			setImg(ImageIO.read(new File("bullet.png")));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		repaint();
+		move(10L,0);
+	}
+	public Bullet(Point p, double velocity, double angle, double offset) {
+		super(p,new Ellipse2D.Double(p.x,p.y,15.0f,15.0f));
+		this.velocity = velocity;
+		this.angle = angle;
+		try {
+			//setImg(ImageIO.read(new File("OyfMt1v.png")));
+			setImg(ImageIO.read(new File("bullet.png")));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		repaint();
+		move(10L,offset);
+	}
+	
+	public Bullet(Point p, double velocity, double angle, int idk, int idk1) {
+		super(p,new Ellipse2D.Double(p.x,p.y,15.0f,15.0f));
+		this.velocity = velocity;
+		this.angle = angle;
 		try {
 			//setImg(ImageIO.read(new File("OyfMt1v.png")));
 			setImg(ImageIO.read(new File("bullet.png")));
@@ -403,9 +518,30 @@ class Bullet extends Object_BulletHell {
 	public void start(double v, double a) {
 		this.velocity = v;
 		this.angle = a;
-		move(0);
+		repaint();
+		move(10L,0);
 	}
 	
+	public Thread getThread() {
+		return thread;
+	}
+	
+	public void setThread(Runnable a) {
+		thread = new Thread(a);
+		thread.start();
+	}
+	
+	public void setVelocity(int v) {
+		velocity = v;
+	}
+	
+	public double getVelocity() {
+		return velocity;
+	}
+	
+	public double getAngle() {
+		return angle;
+	}
 	
 	@Override
 	public void setPos(Point p) {
@@ -421,7 +557,6 @@ class Bullet extends Object_BulletHell {
 	}
 	
 	public boolean checkintersect(Point p) {
-		placeabluecirclewherethespawnpointis();
 		double dx = BossBattle.getInstance().getPlayer().getPos().x - p.x;
 	    double dy = BossBattle.getInstance().getPlayer().getPos().y - p.y;
 
@@ -455,9 +590,40 @@ class Bullet extends Object_BulletHell {
 				        else {
 				        	setPos(new Point((int)newX,(int)newY));
 				        	if(checkintersect(getPos())) {
-				        		//BossBattle.getInstance().remove(BossBattle.getInstance().getPlayer());
+				        		BossBattle.getInstance().remove(BossBattle.getInstance().getPlayer());
 				        	}
 				        	Thread.sleep((long) (velocity*2));
+				        }
+						
+					}catch(Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		});
+		thread.start();
+	}
+	
+	public void move(long d, double a) {
+		delay = d;
+		thread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while(true) {
+					try {
+						double newX = (double)(getPos().x + velocity * Math.cos(Math.toRadians(angle+a)));
+				        double newY = (double)(getPos().y + velocity * Math.sin(Math.toRadians(angle+a)));
+				        if(newX > 720 || newY > 720 || newX < -20 || newY < -21) {
+				        	removebullet();
+				        	thread.join();
+				        	break;
+				        }
+				        else {
+				        	setPos(new Point((int)newX,(int)newY));
+				        	if(checkintersect(getPos())) {
+				        		BossBattle.getInstance().remove(BossBattle.getInstance().getPlayer());
+				        	}
+				        	Thread.sleep(delay);
 				        }
 						
 					}catch(Exception e) {
@@ -470,77 +636,36 @@ class Bullet extends Object_BulletHell {
 	}
 }
 
-class Bullet2 extends Object_BulletHell {
-	private double velocity = 0.0f;
-	private double angle = 0.0f;
-	private Thread thread;
-	public Bullet2(Point p, double velocity, double angle, int offset) {
-		super(p,new Ellipse2D.Double(p.x,p.y,15.0f,7.0f));
-		this.velocity = velocity;
-		this.angle = angle;
-		try {
-			//setImg(ImageIO.read(new File("OyfMt1v.png")));
-			setImg(ImageIO.read(new File("bullet2.png")));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		repaint();
-		move(offset);
+class Bullet2 extends Bullet {
+	private double offset = 0.0f;
+	public Bullet2(Point p, double velocity, double angle, int idk, int idk1, String dir, double offset) {
+		super(p, velocity, angle, idk, idk1);
+		this.offset = offset;
+		idk(0,dir);
 	}
 	
-	@Override
-	public void setPos(Point p) {
-		super.setPos(p);
-	}
-	
-	public void removebullet() {
-		BossBattle.getInstance().removebullet(this);
-	}
-	
-	public void placeabluecirclewherethespawnpointis() {
-		System.out.println("no u");
-	}
-	
-	public boolean checkintersect(Point p) {
-		placeabluecirclewherethespawnpointis();
-		double dx = BossBattle.getInstance().getPlayer().getPos().x - p.x;
-	    double dy = BossBattle.getInstance().getPlayer().getPos().y - p.y;
-
-	    double d = Math.sqrt((dy * dy) + (dx * dx));
-
-	    if (d > (getHitBox().getBounds().width + BossBattle.getInstance().getPlayer().getHitBox().getBounds().width)) {
-	    	return false;
-	    } else if (d < Math.abs(getHitBox().getBounds().width - BossBattle.getInstance().getPlayer().getHitBox().getBounds().width)) {
-	    	return false;
-	    } else {
-	    	return true;
-	    }
-//		if(BossBattle.aaa.getPlayer().getHitBox().intersects(getHitBox().getBounds2D())) {
-//			BossBattle.aaa.remove(BossBattle.aaa.getPlayer());
-//		}
-	}
-	
-	
-	public void move(int a) {
-		thread = new Thread(new Runnable() {
+	public void idk(int a, String dir) {
+		setThread(new Runnable() {
 			@Override
 			public void run() {
+				double angleincrement = getAngle();
 				while(true) {
+					
 					try {
-						double newX = (double)(getPos().x + velocity * Math.cos(Math.toRadians(angle+a)));
-				        double newY = (double)(getPos().y + velocity * Math.sin(Math.toRadians(angle+a)));
+						double newX = (double)(getPos().x + getVelocity() * Math.cos(Math.toRadians(Math.abs(angleincrement))));
+				        double newY = (double)(getPos().y + getVelocity() * Math.sin(Math.toRadians(Math.abs(angleincrement))));
 				        if(newX > 720 || newY > 720 || newX < -20 || newY < -21) {
 				        	removebullet();
-				        	thread.join();
+				        	getThread().join();
 				        	break;
 				        }
 				        else {
 				        	setPos(new Point((int)newX,(int)newY));
 				        	if(checkintersect(getPos())) {
-				        		//BossBattle.getInstance().remove(BossBattle.getInstance().getPlayer());
+				        		BossBattle.getInstance().remove(BossBattle.getInstance().getPlayer());
 				        	}
-				        	Thread.sleep((long) (velocity*2));
+				        	angleincrement+=dir.toLowerCase().equals("clockwise") ? 0.5 : -0.5;
+				        	Thread.sleep(10);
 				        }
 						
 					}catch(Exception e) {
@@ -549,6 +674,5 @@ class Bullet2 extends Object_BulletHell {
 				}
 			}
 		});
-		thread.start();
 	}
 }
