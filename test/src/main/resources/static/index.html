@@ -12,37 +12,42 @@
     	var stompjs = new StompJs.Client({
     		brokerURL: '/literallyanythingelse'
     	});
+    	var username = "";
     	stompjs.onConnect = (conn) => {
     		//setConnected(true);
     		console.log(conn);
+    		
     		stompjs.subscribe('/chat', (message) => {
     			var a = document.createElement("p");
     			a.textContent = JSON.parse(message.body).sender + ": " + JSON.parse(message.body).msg;
     			document.body.insertBefore(a,document.getElementById('chat'));
     		});
-    		stompjs.subscribe('/chat.join',(data) => {
-    			console.log(data);
-    			data.forEach((idx) => {
+    		stompjs.subscribe('/chat.join.' + username,(data) => {
+    			console.log(data.body);
+    			JSON.parse(data.body).log.forEach((idx) => {
     				var a = document.createElement("p");
     				a.textContent = JSON.parse(idx.body).sender + ": " + JSON.parse(idx.body).msg;
     				document.body.insertBefore(a,document.getElementById('chat'));
     			});
     		});
+    		stompjs.publish({
+				destination: "/test/join",
+				body: JSON.stringify({username : username})
+			});
     	};
     	document.addEventListener('DOMContentLoaded', () => {
     		setTimeout(() => {
-    			stompjs.activate();
+    			var userinput = window.prompt("enter username");
+    			if(userinput !== null) {
+    				username = userinput;
+    				stompjs.activate();
+    			}
     		},500);
-    		setTimeout(() => {
-    			stompjs.publish({
-    				destination: "/join"
-    			});
-    		});
     	});
     	function sendmsg() {
     		stompjs.publish({
     			destination: "/chat",
-    			body: JSON.stringify({sender : "sender", msg : document.getElementById('message').value})
+    			body: JSON.stringify({sender : username, msg : document.getElementById('message').value})
     		});
     	}
     </script>
