@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+        <title>hi</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    	<!--<script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>-->
+    	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    </head>
+    <script>
+    	var stompjs = null;
+    	var username = "";
+    	document.addEventListener('DOMContentLoaded', () => {
+			document.getElementById('chat').style.visibility = "hidden";
+    	});
+    	function sendmsg() {
+			stompjs.send('/aaa/chat', {}, JSON.stringify({sender : username, message : document.getElementById('message').value}));
+    	}
+    	function connect() {
+    		username = document.getElementById('username').value;
+    		stompjs = Stomp.over(new SockJS('idk'));
+			stompjs.connect({}, (data) => {
+				stompjs.subscribe('/aa', (message) => {
+					console.log(message);
+					var a = document.createElement("p");
+					a.textContent = JSON.parse(message.body).message;
+					document.body.insertBefore(a,document.getElementById('chat'));
+				});
+				stompjs.subscribe('/aaa/update/' + username, (message) => {
+					JSON.parse(message.body).forEach((index) => {
+						var a = document.createElement("p");
+						a.textContent = index.message;
+						document.body.insertBefore(a,document.getElementById('chat'));
+					});
+				});
+				stompjs.send('/aaa/chat/join/update', {}, JSON.stringify({sender : username, message : ""}));
+				stompjs.send('/aaa/chat/join', {}, JSON.stringify({sender : username, message : ""}));
+			});
+			document.getElementById('login').style.visibility = "hidden";
+			document.getElementById('chat').style.visibility = "visible";
+    	}
+    </script>
+    <body style = "width: 100%; height: 100%;">
+    	<div style="" id="login">
+        	<input style="display: block;margin: 0 auto;"type="text" id="username"></input>
+        	<button style="display: block;margin: 0 auto;" id="connect" onclick="connect()">connect</button>
+        </div>
+        <div style="margin: 0 auto;" id="chat">
+        	<input type="text" id="message"></input>
+        	<button id="send" onclick="sendmsg()">send</button>
+        </div>
+    </body>
+</html>
