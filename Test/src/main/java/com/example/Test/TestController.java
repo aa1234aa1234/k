@@ -8,6 +8,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
@@ -25,15 +26,17 @@ public class TestController {
 	
 	@MessageMapping("/chat/join")
 	@SendTo("/aa")
-	public void join(@Payload Message message, SimpMessageHeaderAccessor headerAccessor) {
+	public Message join(@Payload Message message, SimpMessageHeaderAccessor headerAccessor) {
 		message.setMessage(message.getSender() + " has joined.");
-		repos.addMessage(message);
+		
 		for(int i = 0; i<repos.getMessagecount(); i++) {
 			log.info(repos.getMessage()[i].getMessage());
 		}
 		log.info("");
-		//return message;
+		repos.addMessage(message);
+		return message;
 	}
+	
 	
 	@MessageMapping("/chat/join/update")
 	public void update(@Payload Message message) {
