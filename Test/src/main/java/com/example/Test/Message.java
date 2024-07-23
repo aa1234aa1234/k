@@ -9,12 +9,14 @@ import lombok.NoArgsConstructor;
 public class Message {
 	private String sender;
 	private String message;
+	private String data;
 	public Message() {
 		
 	}
-	public Message(String sender, String message) {
+	public Message(String sender, String message, String data) {
 		this.sender = sender;
 		this.message = message;
+		this.data = data;
 	}
 	public enum MessageType {
 		JOIN, CHAT;
@@ -30,5 +32,11 @@ public class Message {
 	}
 	public void setMessage(String message) {
 		this.message = message;
+	}
+	public String getData() {
+		return data;
+	}
+	public void setData(String data) {
+		this.data = data;
 	}
 }
