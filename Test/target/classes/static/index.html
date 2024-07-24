@@ -12,6 +12,7 @@
     <style>
     	p {
     		text-align: center;
+    		overflow-wrap: break-word;
     	}
     	img {
     		text-align: center;
@@ -26,15 +27,16 @@
 			document.getElementById('chatelement').style.visibility = "hidden";
     	});
     	function sendmsg() {
+    		stompjs.send('/aaa/testinghaha', {}, "");
     		if(document.getElementById('filesend').files[0] != null) {
-				sendimage();
+				sendfile();
 				return;
 			}
     		if(document.getElementById('message').value === "") return;
 			stompjs.send('/aaa/chat', {}, JSON.stringify({sender : username, message : document.getElementById('message').value}));
 			
     	}
-    	function sendimage() {
+    	function sendfile() {
     		var reader = new FileReader();
     		reader.onload = (e) => {
     			var rawdata = e.target.result;
@@ -69,7 +71,8 @@
 				stompjs.subscribe('/aa', (message) => {
 					console.log(message);
 					displaymessage(JSON.parse(message.body));
-					
+					document.getElementById('message').value = null;
+					document.getElementById('filesend').value = null;
 				});
 				stompjs.subscribe('/aaa/update/' + username, (message) => {
 					JSON.parse(message.body).forEach((index) => {
@@ -81,6 +84,9 @@
 					if(JSON.parse(message.body).sender === username) return;
 					displaymessage(JSON.parse(message.body));
 				});
+				stompjs.subscribe('/aaa/testinghaha', (message) => {
+					console.log(message);
+				});
 				stompjs.send('/aaa/chat/join', {}, JSON.stringify({sender : username, message : ""}));
 				setTimeout(() => { stompjs.send('/aaa/chat/join/update', {}, JSON.stringify({sender : username, message : ""})); }, 50);
 				
@@ -89,16 +95,19 @@
 			document.getElementById('login').style.visibility = "hidden";
 			document.getElementById('chatelement').style.visibility = "visible";
     	}
+    	document.addEventListener('keydown', (event) => {
+    		if(event.keyCode == 13) sendmsg();
+    	});
     </script>
     <body style = "width: 100%; height: 100%;">
     	<div style="" id="login">
         	<input style="display: block;margin: 0 auto;"type="text" id="username"></input>
         	<button style="display: block;margin: 0 auto;" id="connect" onclick="connect()">connect</button>
         </div>
-        <div style="margin: 0 auto; text-align: center;" id="chat">
+        <div style="margin: 0 auto; max-height: 90vh; text-align: center; display: inline-block; overflow: auto; width:100%;" id="chat">
         </div>
-        <div style="margin: 0 auto; text-align: center; " id="chatelement">
-        	<input style="margin: 0 auto; display: inline;" type="file" id="filesend" accept="image/png, image/jpeg"></input>
+        <div style="margin: 0 auto; text-align: center; float: top; bottom: 0; position: fixed; width: 100%; " id="chatelement">
+        	<input style="margin: 0 auto; display: inline;" type="file" id="filesend"></input>
         	<input style="margin: 0 auto; display: inline;" type="text" id="message"></input>
         	<button style="text-align: center; margin: 0 auto; display: inline;" id="send" onclick="sendmsg()">send</button>
         </div>
