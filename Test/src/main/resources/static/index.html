@@ -89,6 +89,7 @@
 				});
 				stompjs.send('/aaa/chat/join', {}, JSON.stringify({sender : username, message : ""}));
 				setTimeout(() => { stompjs.send('/aaa/chat/join/update', {}, JSON.stringify({sender : username, message : ""})); }, 50);
+				setTimeout(() => { stompjs.send('/aaa/bar', {}, ); }, 50);
 				
 				
 			});
