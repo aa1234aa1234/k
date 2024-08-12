@@ -31,6 +31,7 @@ import org.springframework.util.concurrent.SuccessCallback;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -78,52 +79,52 @@ public class TestController {
 	
 	
 	
-	@RequestMapping("/bar")
-    public ResponseEntity<String> invalidcharacterfoundinmethodname() {
-		WebClient client = WebClient.builder()
-				.baseUrl("https://housevalue.co.kr/")
-				.defaultHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36")
-				.build();
-		MultiValueMap<String, String> formdata = new LinkedMultiValueMap<>();
-		formdata.set("address1", "서울");
-		formdata.set("address2", "중구");
-		formdata.set("address3", "명동2가");
-		formdata.set("mountain_yn", "N");
-		formdata.set("main_address_no", "1");
-		formdata.set("sub_address_no", "18");
-		formdata.set("longitude", "126.98586313967616");
-		formdata.set("latitude", "37.56342853082633");
-		formdata.set("d_search", "3bhdpV6xBvdTZeSTB3TH5gcadqImuKS3LDzw1c6OyOHNmUGVNh");
-		formdata.set("only_price", "false");
-		formdata.set("idx", "0");
-		formdata.set("view_this_real", "");
-		formdata.set("view_this_rental", "");
-		formdata.set("view_likeness_real", "");
-		formdata.set("view_likeness_rental", "");
-		formdata.set("view_likeness_real2", "");
-		formdata.set("view_likeness_real3", "");
-		formdata.set("view_contract_real", "");
-		formdata.set("view_close_real", "");
-		formdata.set("view_contract_rental", "");
-		formdata.set("view_close_rental", "");
-		formdata.set("view_contract_real2", "");
-		formdata.set("view_close_real2", "");
-		formdata.set("view_contract_real3", "");
-		formdata.set("view_close_real3", "");
-		WebClient.ResponseSpec response = client.post()
-		.uri("/h_data/jibun_detail/real_price")
-		.bodyValue(formdata)
-		.retrieve();
-		
-		System.out.println(client.toString());
-		JSONObject obj = new JSONObject(response.toEntity(String.class).block().getBody());
-//		for(Map.Entry<String,Object> e : obj.toMap().entrySet()) {
-//			System.out.println(e);
-//		}
-		//System.out.println(obj.get("gunmul_result"));
-		return ResponseEntity.ok()
-				.body(obj.toString());
-    }
+//	@RequestMapping("/testing/bar")
+//    public ResponseEntity<String> invalidcharacterfoundinmethodname() {
+//		WebClient client = WebClient.builder()
+//				.baseUrl("https://housevalue.co.kr/")
+//				.defaultHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36")
+//				.build();
+//		MultiValueMap<String, String> formdata = new LinkedMultiValueMap<>();
+//		formdata.set("address1", "서울");
+//		formdata.set("address2", "중구");
+//		formdata.set("address3", "명동2가");
+//		formdata.set("mountain_yn", "N");
+//		formdata.set("main_address_no", "1");
+//		formdata.set("sub_address_no", "18");
+//		formdata.set("longitude", "126.98586313967616");
+//		formdata.set("latitude", "37.56342853082633");
+//		formdata.set("d_search", "3bhdpV6xBvdTZeSTB3TH5gcadqImuKS3LDzw1c6OyOHNmUGVNh");
+//		formdata.set("only_price", "false");
+//		formdata.set("idx", "0");
+//		formdata.set("view_this_real", "");
+//		formdata.set("view_this_rental", "");
+//		formdata.set("view_likeness_real", "");
+//		formdata.set("view_likeness_rental", "");
+//		formdata.set("view_likeness_real2", "");
+//		formdata.set("view_likeness_real3", "");
+//		formdata.set("view_contract_real", "");
+//		formdata.set("view_close_real", "");
+//		formdata.set("view_contract_rental", "");
+//		formdata.set("view_close_rental", "");
+//		formdata.set("view_contract_real2", "");
+//		formdata.set("view_close_real2", "");
+//		formdata.set("view_contract_real3", "");
+//		formdata.set("view_close_real3", "");
+//		WebClient.ResponseSpec response = client.post()
+//		.uri("/h_data/jibun_detail/real_price")
+//		.bodyValue(formdata)
+//		.retrieve();
+//		
+//		System.out.println(client.toString());
+//		JSONObject obj = new JSONObject(response.toEntity(String.class).block().getBody());
+////		for(Map.Entry<String,Object> e : obj.toMap().entrySet()) {
+////			System.out.println(e);
+////		}
+//		//System.out.println(obj.get("gunmul_result"));
+//		return ResponseEntity.ok()
+//				.body(obj.toString());
+//    }
 	
 	
 //	@MessageMapping("/chat/image")
@@ -144,19 +145,18 @@ public class TestController {
 		template.convertAndSend("/aaa/update/" + message.getSender(),list.toArray());
 	}
 	
-	@MessageMapping("/testinghaha")
-	public void create() {
-		WebClient a = WebClient.builder()
-				.baseUrl("http://localhost:8080/")
-				.build();
-		ResponseEntity<String> res = a.post()
-		.uri("/bar")
-		.retrieve().toEntity(String.class).block();
-		System.out.println(res.getBody());
+//	@MessageMapping("/testinghaha")
+//	public ResponseEntity<String> create() {
+//		WebClient a = WebClient.builder()
+//				.baseUrl("http://localhost:8080/")
+//				.build();
+//		ResponseEntity<String> res = a.post()
+//		.uri("/testing/bar")
+//		.retrieve().toEntity(String.class).block();
 //	    return ResponseEntity.status(HttpStatus.CREATED)
 //	       .contentType(MediaType.TEXT_PLAIN)
 //	       .body("Custom string answer");
-	}
+//	}
 	
 	@MessageMapping("/chat")
 	@SendTo("/aa")
