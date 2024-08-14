@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
@@ -62,6 +63,19 @@ public class TestController {
 		log.info("");
 		
 		return message;
+	}
+	
+	@GetMapping("/test")
+	public String takeonme() {
+		return "/a.html";
+	}
+	
+	@PostMapping("/test")
+	public ResponseEntity<Message> takemeon(@RequestBody Message message) {
+		System.out.println(message.getSender());
+		return ResponseEntity.ok()
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(message);
 	}
 	
 	@MessageMapping("/chat/image/download")
@@ -134,6 +148,8 @@ public class TestController {
 //		data.setMessage(data.getSender() + ": " + data.getMessage());
 //		return data;
 //	}
+	
+	
 	
 	@MessageMapping("/chat/join/update")
 	public void update(@Payload Message message) {

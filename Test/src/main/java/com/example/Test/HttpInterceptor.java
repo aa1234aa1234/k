@@ -18,7 +18,8 @@ public class HttpInterceptor implements HandlerInterceptor {
 	
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-		System.out.println(request.getHeader("Context-Type"));
+		//System.out.println(response.getHeaderNames());
+		//System.out.println(request.getHeader("Content-Type"));
 		return true;
 	}
 }

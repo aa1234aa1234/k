@@ -28,4 +28,5 @@ public class TestConfig implements WebSocketMessageBrokerConfigurer{
 		registry.setSendBufferSizeLimit(1024*1024);
 		registry.setMessageSizeLimit(1024*1024);
 	}
+	
 }
