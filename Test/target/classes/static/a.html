@@ -22,8 +22,9 @@
     </style>
     <script>
     	var stompjs = null;
-    	var username = "";
+    	var username = "${sender}";
     	document.addEventListener('DOMContentLoaded', () => {
+    		connect();
     	});
     	function sendmsg() {
     		stompjs.send('/aaa/testinghaha', {}, "");
@@ -64,7 +65,6 @@
 			}
     	}
     	function connect() {
-    		username = document.getElementById('username').value;
     		stompjs = Stomp.over(new SockJS('idk'));
 			stompjs.connect({}, (data) => {
 				stompjs.subscribe('/aa', (message) => {

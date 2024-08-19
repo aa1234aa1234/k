@@ -25,16 +25,19 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.SuccessCallback;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
@@ -61,21 +64,25 @@ public class TestController {
 			log.info(repos.getMessage()[i].getMessage());
 		}
 		log.info("");
-		
 		return message;
 	}
 	
 	@GetMapping("/test")
-	public String takeonme() {
+	public String takeonme(Model model) {
+		//model.addAttribute("sender", message.getSender());
+		//model.addAttribute("message",message.getMessage());
 		return "/a.html";
 	}
 	
 	@PostMapping("/test")
-	public ResponseEntity<Message> takemeon(@RequestBody Message message) {
-		System.out.println(message.getSender());
-		return ResponseEntity.ok()
-				.contentType(MediaType.APPLICATION_JSON)
-				.body(message);
+	public String takemeon(@RequestBody Message message, Model model) {
+		System.out.println(message.getSender() + message.getMessage());
+		model.addAttribute("sender", message.getSender());
+		model.addAttribute("message",message.getMessage());
+		return "/a.html";
+//		return ResponseEntity.ok()
+//				.contentType(MediaType.APPLICATION_JSON)
+//				.body(message);
 	}
 	
 	@MessageMapping("/chat/image/download")
@@ -105,7 +112,7 @@ public class TestController {
 //		formdata.set("address3", "명동2가");
 //		formdata.set("mountain_yn", "N");
 //		formdata.set("main_address_no", "1");
-//		formdata.set("sub_address_no", "18");
+//		formdata.set("sub_address_no", "18
 //		formdata.set("longitude", "126.98586313967616");
 //		formdata.set("latitude", "37.56342853082633");
 //		formdata.set("d_search", "3bhdpV6xBvdTZeSTB3TH5gcadqImuKS3LDzw1c6OyOHNmUGVNh");

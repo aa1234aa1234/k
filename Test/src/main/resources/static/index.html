@@ -25,11 +25,34 @@
     	var username = "";
     	function connect() {
     		username = document.getElementById('username').value;
-			var idk = new XMLHttpRequest();
-			idk.open("POST","/test",true);
-			idk.setRequestHeader("Content-Type","application/json");
-			idk.send(JSON.stringify({sender : username, message : username + " has joined."}));
-			location.href = "/test";
+			// var idk = new XMLHttpRequest();
+			
+			// idk.open("GET","/test");
+			// idk.send();
+			// idk.onreadystatechange = function() {
+			//     if(idk.readyState == XMLHttpRequest.DONE){
+			//     	if(idk.status == 200) {
+			// 			var newtext = idk.responseText.replace("    	var username = null;","    	var username=" + "\"" + username + "\"" + ";");
+			// 			console.log(newtext);
+			// 			document.close();
+			//             document.write(newtext);
+			//             var h = new XMLHttpRequest();
+			// 			h.open("POST","/test",true);
+						
+			// 			h.setRequestHeader("Content-Type","application/json");
+			// 			h.send(JSON.stringify({sender : username, message : username + " has joined."}));
+			//         }
+			//         else{ 
+			//             console.log("Error : " + idk.status);
+			//         }
+			//     }
+			// }
+			
+			var h = new XMLHttpRequest();
+			h.open("POST","/test",true);
+			h.setRequestHeader("Content-Type","application/json");
+			h.send(JSON.stringify({sender : username, message : username + " has joined."}));
+			document.location.href = "/test";
     	}
     </script>
     <body style = "width: 100%; height: 100%;">
