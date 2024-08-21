@@ -67,17 +67,19 @@ public class TestController {
 		return message;
 	}
 	
+	@GetMapping("/")
+	public String home() {
+		return "/index.html";
+	}
+	
 	@GetMapping("/test")
-	public String takeonme(Model model) {
-		//model.addAttribute("sender", message.getSender());
-		//model.addAttribute("message",message.getMessage());
+	public String takeonme() {
 		return "/a.html";
 	}
 	
 	@PostMapping("/test")
 	public String takemeon(@RequestBody Message message, Model model) {
-		System.out.println(message.getSender() + message.getMessage());
-		model.addAttribute("sender", message.getSender());
+		model.addAttribute("sender",message.getSender());
 		model.addAttribute("message",message.getMessage());
 		return "/a.html";
 //		return ResponseEntity.ok()
