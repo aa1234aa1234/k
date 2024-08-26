@@ -22,7 +22,7 @@
     </style>
     <script th:inline="javascript">
     	var stompjs = null;
-    	var username = [[${sender}]];
+    	var username = ${sender};
     	document.addEventListener('DOMContentLoaded', () => {
     		connect();
     	});

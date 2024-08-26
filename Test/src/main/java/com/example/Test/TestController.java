@@ -49,8 +49,14 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 public class TestController {
 	@Autowired
+	
 	private SimpMessagingTemplate template;
+	@Autowired
+	private UserRepository userRepos;
 	private ChatRepository repos = new ChatRepository();
+	
+	
+	
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TestController.class);
 
 	
@@ -69,22 +75,34 @@ public class TestController {
 	
 	@GetMapping("/")
 	public String home() {
+		return "redirect:/home";
+	}
+	
+	@GetMapping("/home")
+	public String talkinaway() {
 		return "/index.html";
 	}
 	
 	@GetMapping("/test")
-	public String takeonme() {
+	public String idontknow() {
 		return "/a.html";
 	}
 	
+	
+	
 	@PostMapping("/test")
-	public String takemeon(@RequestBody Message message, Model model) {
+	public String whatimtosayillsayitanyway(@RequestBody Message message, Model model) {
 		model.addAttribute("sender",message.getSender());
 		model.addAttribute("message",message.getMessage());
 		return "/a.html";
 //		return ResponseEntity.ok()
 //				.contentType(MediaType.APPLICATION_JSON)
 //				.body(message);
+	}
+	
+	@PostMapping("/login_process")
+	public String todayisanotherdaytofindyou() {
+		return "redirect:/home";
 	}
 	
 	@MessageMapping("/chat/image/download")
