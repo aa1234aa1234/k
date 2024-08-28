@@ -25,6 +25,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -48,6 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Controller
 public class TestController {
+	
 	@Autowired
 	
 	private SimpMessagingTemplate template;
@@ -59,7 +61,7 @@ public class TestController {
 	
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TestController.class);
 
-	
+
 	@MessageMapping("/chat/join")
 	@SendTo("/aaa/broadcast/#")
 	public Message join(@Payload Message message, SimpMessageHeaderAccessor headerAccessor) {
@@ -100,9 +102,15 @@ public class TestController {
 //				.body(message);
 	}
 	
-	@PostMapping("/login_process")
-	public String todayisanotherdaytofindyou() {
+	@PostMapping("/login")
+	public String todayisanotherdaytofindyou(@RequestBody UserDto userDto) {
+		System.out.println(userDto);
 		return "redirect:/home";
+	}
+	
+	@GetMapping("/login")
+	public String shyinaway() {
+		return "/login.html";
 	}
 	
 	@MessageMapping("/chat/image/download")
