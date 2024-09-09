@@ -82,12 +82,12 @@ public class TestController {
 	
 	@GetMapping("/home")
 	public String talkinaway() {
-		return "/index.html";
+		return "/index";
 	}
 	
 	@GetMapping("/test")
 	public String idontknow() {
-		return "/a.html";
+		return "/a";
 	}
 	
 	
@@ -96,21 +96,28 @@ public class TestController {
 	public String whatimtosayillsayitanyway(@RequestBody Message message, Model model) {
 		model.addAttribute("sender",message.getSender());
 		model.addAttribute("message",message.getMessage());
-		return "/a.html";
+		return "/a";
 //		return ResponseEntity.ok()
 //				.contentType(MediaType.APPLICATION_JSON)
 //				.body(message);
 	}
 	
 	@PostMapping("/login")
-	public String todayisanotherdaytofindyou(@RequestBody UserDto userDto) {
-		System.out.println(userDto);
-		return "redirect:/home";
+	public String todayisanotherdaytofindyou(UserDTO userDto, Model model) {
+		if(userRepos.findByName(userDto.getUsername()).size() > 0) {
+			model.addAttribute("res","an account with that username already exists");
+			return "redirect:/login";
+		}
+		
+		
+		userRepos.save(userDto.toEntity());
+		return "redirect:/";
 	}
 	
 	@GetMapping("/login")
-	public String shyinaway() {
-		return "/login.html";
+	public String shyinaway(Model model) {
+		model.addAttribute("res","yhehe");
+		return "/login";
 	}
 	
 	@MessageMapping("/chat/image/download")

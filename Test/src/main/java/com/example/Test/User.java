@@ -18,16 +18,16 @@ import lombok.experimental.SuperBuilder;
 
 @Entity
 @SuperBuilder
-@Table(name = "users")
+@Table(name = "test")
 public class User {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String name;
 
-    @Column(nullable = false, unique = false)
+    @Column(nullable = true, unique = false)
     private String password;
     
     @Column(nullable = true, unique = false)
