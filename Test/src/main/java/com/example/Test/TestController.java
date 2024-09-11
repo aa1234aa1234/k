@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.json.JSONObject;
@@ -39,10 +40,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
@@ -75,19 +78,17 @@ public class TestController {
 		return message;
 	}
 	
-	@GetMapping("/")
-	public String home() {
-		return "redirect:/home";
-	}
 	
-	@GetMapping("/home")
-	public String talkinaway() {
-		return "/index";
+	@GetMapping({"/home","","/"})
+	public String talkinaway(@SessionAttribute(name = "username", required = false) String username, Model model) {
+		if(username == null) model.addAttribute("username","not logged in");
+		else model.addAttribute("username",username);
+		return "home";
 	}
 	
 	@GetMapping("/test")
 	public String idontknow() {
-		return "/a";
+		return "a";
 	}
 	
 	
@@ -96,28 +97,58 @@ public class TestController {
 	public String whatimtosayillsayitanyway(@RequestBody Message message, Model model) {
 		model.addAttribute("sender",message.getSender());
 		model.addAttribute("message",message.getMessage());
-		return "/a";
+		return "a";
 //		return ResponseEntity.ok()
 //				.contentType(MediaType.APPLICATION_JSON)
 //				.body(message);
 	}
 	
 	@PostMapping("/login")
-	public String todayisanotherdaytofindyou(UserDTO userDto, Model model) {
-		if(userRepos.findByName(userDto.getUsername()).size() > 0) {
-			model.addAttribute("res","an account with that username already exists");
-			return "redirect:/login";
+	public String todayisanotherdaytofindyou(UserDTO userDto, Model model, HttpServletRequest request) {
+		List<User> user = null;
+		if((user = userRepos.findByName(userDto.getUsername())) != null && user.get(0).getPassword().equals(userDto.getPassword())) {
+			request.getSession(true).setAttribute("username", userDto.getUsername());
+			return "redirect:/";
 		}
 		
+		model.addAttribute("res","username or password is incorrect");
+		return "login";
 		
-		userRepos.save(userDto.toEntity());
-		return "redirect:/";
 	}
 	
 	@GetMapping("/login")
-	public String shyinaway(Model model) {
-		model.addAttribute("res","yhehe");
-		return "/login";
+	public String shyinaway(@SessionAttribute(name = "username", required = false) String username, Model model) {
+		if(username != null) {
+			return "redirect:/home";
+		}
+		model.addAttribute("res","");
+		return "login";
+	}
+	
+	@GetMapping("/logout")
+	public String illbecomingforyourloveokay(HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+		if(session != null) session.invalidate();
+		return "redirect:/";
+	}
+	
+	@GetMapping("/signup")
+	public String takeonme(@SessionAttribute(name = "username", required = false) String username, Model model) {
+		if(username != null) {
+			return "redirect:/home";
+		}
+		model.addAttribute("res","");
+		return "signup";
+	}
+	
+	@PostMapping("/signup")
+	public String takemeon(UserDTO userDTO, Model model) {
+		if(userRepos.findByName(userDTO.getUsername()).size() > 0) {
+			model.addAttribute("res","this username already exists");
+			return "signup";
+		}
+		userRepos.save(userDTO.toEntity());
+		return "redirect:/";
 	}
 	
 	@MessageMapping("/chat/image/download")
