@@ -1,0 +1,311 @@
+package com.example.Test;
+
+import java.io.BufferedReader;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.event.EventListener;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.concurrent.SuccessCallback;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
+
+@Controller
+public class TestController {
+	
+	@Autowired
+	
+	private SimpMessagingTemplate template;
+	@Autowired
+	private UserRepository userRepos;
+	private ChatRepository repos = new ChatRepository();
+	
+	
+	
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(TestController.class);
+
+
+	@MessageMapping("/chat/join")
+	@SendTo("/aaa/broadcast/#")
+	public Message join(@Payload Message message, SimpMessageHeaderAccessor headerAccessor) {
+		log.info("join: " + message.getSender());
+		message.setMessage(message.getSender() + " has joined.");
+		repos.addMessage(message);
+		for(int i = 0; i<repos.getMessagecount(); i++) {
+			log.info(repos.getMessage()[i].getMessage());
+		}
+		log.info("");
+		return message;
+	}
+	
+	
+	@GetMapping("/ihavenoidea")
+	public String illbegoneinadayortwo(String code) {
+		System.out.println(code);
+		WebClient client = WebClient.builder()
+				.baseUrl("https://kauth.kakao.com/oauth/token")
+				.defaultHeader("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
+				.build();
+		MultiValueMap<String, String> formdata = new LinkedMultiValueMap<>();
+		formdata.set("client_id", "b13e01f3a0eb79313271c5a0107eb9ff");
+		formdata.set("redirect_uri", "http://www.localhost:8080/ihavenoidea");
+		//formdata.set("client_secret","q3lQembClkkQuCivuWCie7tfX8nvY2Wf");
+		formdata.set("grant_type", "authorization_code");
+		formdata.set("code", code);
+		WebClient.ResponseSpec response = client.method(HttpMethod.POST)
+				.bodyValue(formdata)
+		.retrieve();
+		System.out.println(response.toEntity(String.class).block().getHeaders());
+		return "redirect:/";
+	}
+	
+	@GetMapping({"/home","","/"})
+	public String talkinaway(@SessionAttribute(name = "username", required = false) String username, Model model) {
+		if(username == null) model.addAttribute("username","not logged in");
+		else model.addAttribute("username",username);
+//		WebClient client = WebClient.builder()
+//				.baseUrl("https://open.neis.go.kr/hub/mealServiceDietInfo")
+//				.defaultHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36")
+//				.build();
+//		MultiValueMap<String, String> formdata = new LinkedMultiValueMap<>();
+//		formdata.add("KEY", "0030f082996c4da99c5d1402336ea895");
+//		formdata.add("ATPT_OFCDC_SC_CODE", "N10");
+//		formdata.add("SD_SCHUL_CODE", "8140387");
+//		formdata.add("MLSV_YMD", "20240930");
+//		formdata.add("Type", "json");
+//		formdata.add("pIndex", "10");
+//		formdata.add("pSize", "1009");
+//		
+//		WebClient.ResponseSpec response = client.method(HttpMethod.POST)
+//				.uri("?KEY={key}&Type=json&ATPT_OFCDC_SC_CODE=N10&SD_SCHUL_CODE=8140387&MLSV_YMD={date}","0030f082996c4da99c5d1402336ea895","20240930")
+//				.body(BodyInserters.fromFormData(formdata))
+//				.retrieve();
+//		
+//		System.out.println(response.toEntity(String.class).block().getBody());
+		//JSONObject obj = new JSONObject(response.toEntity(String.class).block().getBody());
+		//obj.getJSONArray("RESULT");
+		//for(String str : obj.get("DDISH_NM").toString().split("<br/>")) System.out.println(str);
+		
+		return "home";
+	}
+	
+	@GetMapping("/test")
+	public String idontknow() {
+		return "a";
+	}
+	
+	
+	
+	@PostMapping("/test")
+	public String whatimtosayillsayitanyway(@RequestBody Message message, Model model) {
+		model.addAttribute("sender",message.getSender());
+		model.addAttribute("message",message.getMessage());
+		return "a";
+//		return ResponseEntity.ok()
+//				.contentType(MediaType.APPLICATION_JSON)
+//				.body(message);
+	}
+	
+	@PostMapping("/login")
+	public String todayisanotherdaytofindyou(UserDTO userDto, Model model, HttpServletRequest request) {
+		List<User> user = null;
+		if((user = userRepos.findByName(userDto.getUsername())) != null && user.get(0).getPassword().equals(userDto.getPassword())) {
+			request.getSession(true).setAttribute("username", userDto.getUsername());
+			return "redirect:/";
+		}
+		
+		model.addAttribute("res","username or password is incorrect");
+		return "login";
+		
+	}
+	
+	@GetMapping("/login")
+	public String shyinaway(@SessionAttribute(name = "username", required = false) String username, Model model) {
+		if(username != null) {
+			return "redirect:/home";
+		}
+		model.addAttribute("res","");
+		return "login";
+	}
+	
+	@GetMapping("/logout")
+	public String illbecomingforyourloveokay(HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+		if(session != null) session.invalidate();
+		return "redirect:/";
+	}
+	
+	@GetMapping("/signup")
+	public String takeonme(@SessionAttribute(name = "username", required = false) String username, Model model) {
+		if(username != null) {
+			return "redirect:/home";
+		}
+		model.addAttribute("res","");
+		return "signup";
+	}
+	
+	@PostMapping("/signup")
+	public String takemeon(UserDTO userDTO, Model model) {
+		if(userRepos.findByName(userDTO.getUsername()).size() > 0) {
+			model.addAttribute("res","this username already exists");
+			return "signup";
+		}
+		userRepos.save(userDTO.toEntity());
+		return "redirect:/";
+	}
+	
+	@MessageMapping("/chat/image/download")
+	public ResponseEntity<Resource> download(byte[] data) {
+		ByteArrayResource resource = new ByteArrayResource(data);
+	    return ResponseEntity.ok()
+	            .contentType(MediaType.IMAGE_PNG)
+	            .contentLength(resource.contentLength())
+	            .header(HttpHeaders.CONTENT_DISPOSITION,
+	                    ContentDisposition.attachment()
+	                        .filename("hi")
+	                        .build().toString())
+	            .body(resource);
+	}
+	
+	
+	
+	
+	
+//	@RequestMapping("/testing/bar")
+//    public ResponseEntity<String> invalidcharacterfoundinmethodname() {
+//		WebClient client = WebClient.builder()
+//				.baseUrl("https://housevalue.co.kr/")
+//				.defaultHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36")
+//				.build();
+//		MultiValueMap<String, String> formdata = new LinkedMultiValueMap<>();
+//		formdata.set("address1", "서울");
+//		formdata.set("address2", "중구");
+//		formdata.set("address3", "명동2가");
+//		formdata.set("mountain_yn", "N");
+//		formdata.set("main_address_no", "1");
+//		formdata.set("sub_address_no", "18
+//		formdata.set("longitude", "126.98586313967616");
+//		formdata.set("latitude", "37.56342853082633");
+//		formdata.set("d_search", "3bhdpV6xBvdTZeSTB3TH5gcadqImuKS3LDzw1c6OyOHNmUGVNh");
+//		formdata.set("only_price", "false");
+//		formdata.set("idx", "0");
+//		formdata.set("view_this_real", "");
+//		formdata.set("view_this_rental", "");
+//		formdata.set("view_likeness_real", "");
+//		formdata.set("view_likeness_rental", "");
+//		formdata.set("view_likeness_real2", "");
+//		formdata.set("view_likeness_real3", "");
+//		formdata.set("view_contract_real", "");
+//		formdata.set("view_close_real", "");
+//		formdata.set("view_contract_rental", "");
+//		formdata.set("view_close_rental", "");
+//		formdata.set("view_contract_real2", "");
+//		formdata.set("view_close_real2", "");
+//		formdata.set("view_contract_real3", "");
+//		formdata.set("view_close_real3", "");
+//		WebClient.ResponseSpec response = client.post()
+//		.uri("/h_data/jibun_detail/real_price")
+//		.bodyValue(formdata)
+//		.retrieve();
+//		
+//		System.out.println(client.toString());
+//		JSONObject obj = new JSONObject(response.toEntity(String.class).block().getBody());
+////		for(Map.Entry<String,Object> e : obj.toMap().entrySet()) {
+////			System.out.println(e);
+////		}
+//		//System.out.println(obj.get("gunmul_result"));
+//		return ResponseEntity.ok()
+//				.body(obj.toString());
+//    }
+	
+	
+//	@MessageMapping("/chat/image")
+//	@SendTo("/aa")
+//	public Message sendimage(@Payload Message data) {
+//		repos.addMessage(data);
+//		data.setMessage(data.getSender() + ": " + data.getMessage());
+//		return data;
+//	}
+	
+	
+	
+	@MessageMapping("/chat/join/update")
+	public void update(@Payload Message message) {
+		log.info("update: " + message.getSender());
+		ArrayList<Message> list = new ArrayList<>();
+		for(int i = 0; i<repos.getMessagecount(); i++) {
+			list.add(repos.getMessage()[i]);
+		}
+		template.convertAndSend("/aaa/update/" + message.getSender(),list.toArray());
+	}
+	
+//	@MessageMapping("/testinghaha")
+//	public ResponseEntity<String> create() {
+//		WebClient a = WebClient.builder()
+//				.baseUrl("http://localhost:8080/")
+//				.build();
+//		ResponseEntity<String> res = a.post()
+//		.uri("/testing/bar")
+//		.retrieve().toEntity(String.class).block();
+//	    return ResponseEntity.status(HttpStatus.CREATED)
+//	       .contentType(MediaType.TEXT_PLAIN)
+//	       .body("Custom string answer");
+//	}
+	
+	@MessageMapping("/chat")
+	@SendTo("/aa")
+	public Message chat(@Payload Message message) {
+		repos.addMessage(message);
+		
+		message.setMessage(message.getSender() + ": " + message.getMessage());
+		return message;
+	}
+	
+	@EventListener
+	public void disconnect(SessionDisconnectEvent event) {
+		StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+		template.convertAndSend("/aa", new Message() {{setSender((String) headerAccessor.getSessionAttributes().get("username")); setMessage(getSender() + " has left.");}});
+	}
+}
