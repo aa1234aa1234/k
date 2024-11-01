@@ -39,11 +39,11 @@ public class Room {
             BufferedImage collisionMap = image;
             int mapWidth = collisionMap.getWidth()/tile_size;
             int mapHeight = collisionMap.getHeight()/tile_size;
-            map = new int[mapWidth][mapHeight];
-            for (int x = 0; x < mapWidth; x++) {
-                for (int y = 0; y < mapHeight; y++) {
-                    map[x][y] = isTileWalkable(image, x * tile_size, y * tile_size) ? 0 : 1;
-                    System.out.print(map[x][y] + " ");
+            map = new int[mapHeight][mapWidth];
+            for (int y = 0; y < mapHeight; y++) {
+                for (int x = 0; x < mapWidth; x++) {
+                    map[y][x] = isTileWalkable(image, x * tile_size, y * tile_size) ? 0 : 1;
+                    System.out.print(map[y][x] + " ");
                 }
                 System.out.println();
             }
@@ -58,9 +58,9 @@ public class Room {
         int pixelCount = 0;
         int totalBrightness = 0;
 
-        for (int x = startX; x < startX + tile_size; x++) {
-            for (int y = startY; y < startY + tile_size; y++) {
-                int color = image.getRGB(x, y);
+        for (int y = startY; y < startY + tile_size; y++) {
+            for (int x = startX; x < startX + tile_size; x++) {
+                int color = image.getRGB(x,y);
                 if(((color >> 24) & 0xff) == 0) { pixelCount++; continue; }
                 // Extract brightness based on the color (black and white threshold)
                 int red = (color >> 16) & 0xff;
@@ -91,5 +91,13 @@ public class Room {
 
     public void setAssets(ArrayList<Asset> assets) {
         this.assets = assets;
+    }
+
+    public int[][] getMap() { 
+        return map; 
+    }
+
+    public static int getTileSize() { 
+        return tile_size; 
     }
 }
