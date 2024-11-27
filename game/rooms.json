@@ -1,0 +1,51 @@
+{
+  "rooms": [
+    {
+      "roomNo": 0,
+      "exits": [
+        {
+          "x": 1560,
+          "y": 260,
+          "Width": 20,
+          "Height": 300,
+          "NextRoomNo": 1,
+          "enterPoint": {"x": 1000,"y": 1100}
+        },
+        {
+          "x": 290,
+          "y": 220,
+          "Width": 10,
+          "Height": 10,
+          "NextRoomNo": 2,
+          "enterPoint": {"x": 310,"y": 495}
+        }
+      ]
+    },
+    {
+      "roomNo": 1,
+      "exits": [
+        {
+          "x": 0,
+          "y": 0,
+          "Width": 20,
+          "Height": 200,
+          "NextRoomNo": 0,
+          "enterPoint": {"x": 1500,"y": 350}
+        }
+      ]
+    },
+    {
+      "roomNo": 2,
+      "exits": [
+        {
+          "x": 250,
+          "y": 620,
+          "Width": 100,
+          "Height": 25,
+          "NextRoomNo": 0,
+          "enterPoint": {"x": 540,"y": 83}
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "assets": [
+    {
+      "roomNo": 0,
+      "Size": {
+        "x": 350,
+        "y": 130,
+        "Width": 285,
+        "Height": 250
+      },
+      "Collision": {
+        "x": 350,
+        "y": 130,
+        "Width": 265,
+        "Height": 225
+      },
+      "ImagePath": "assets/house.png",
+      "Layer": 0
+    },
+    {
+      "roomNo": 2,
+      "Size": {
+        "x": 500,
+        "y": 350,
+        "Width": 70,
+        "Height": 100
+      },
+      "Collision": {
+        "x": 500,
+        "y": 350,
+        "Width": 70,
+        "Height": 100
+      },
+      "ImagePath": "player_sprites/ehehe.png",
+      "Layer": 1
+    }
+  ]
+}
