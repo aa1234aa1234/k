@@ -19,15 +19,17 @@ def run(dataset) -> None:
         #page.on("popup",lambda new_page: (print(f"{new_page.url}")))
         def login():
             page.locator('a:has(img[alt="로그인"])').click()
-            page.wait_for_load_state('load')
-            page.evaluate(f"""() => {{
-                document.querySelector('#txtMember').value = '{login_id}';
-                document.querySelector('#txtPwd').value = '{login_pwd}';
+            page.wait_for_selector('#txtMember')
+            page.evaluate("""({login_ida,login_pwdb}) => {
+                document.querySelector('#txtMember').value = login_ida;
+                document.querySelector('#txtPwd').value = login_pwdb;
                 document.querySelector('a[href="javascript:Login(1);"]').click();
-            }}""")
+            }""",{"login_ida" : login_id,"login_pwdb" : login_pwd})
+            #input("")
             page.wait_for_load_state('load')
         def bruh():
             #page.wait_for_selector('span[class="point02"]',timeout=5000)
+            print('loaded')
             lol = page.evaluate("""()=> {
                 var a = document.querySelector('span[class=\"point02\"]');
                 return a ? a.innerText : null;
@@ -46,8 +48,8 @@ def run(dataset) -> None:
         page.on('popup',lambda a: print("a"))
         page.on('frameattached',lambda a: print("cool"))
         page.on('framedetached', lambda a: print("wowie"))
+        page.on('dialog',lambda a: print(a))
         login()
-        input("bruh")
         if login_id is not None:
             return
         test = page.frame(url="https://www.letskorail.com/co/common/popupView.do")
