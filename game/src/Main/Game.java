@@ -160,9 +160,10 @@ public class Game extends JFrame {
                 }
             }
         });
-
+        JLabel a = new JLabel() {{ setLayout(null); setBounds(100,100,50,50); }};
         UILayer = new JPanel() {{ setLayout(null); setOpaque(false); setBounds(0,0,1000,700); }};
         UILayer.add(dialogBox);
+        UILayer.add(a);
         c.setLayout(null);
         layeredPane.add(gamepanel,Integer.valueOf(0));
         layeredPane.add(UILayer,Integer.valueOf(1));
@@ -170,7 +171,15 @@ public class Game extends JFrame {
         //c.add(UILayer);
 
         c.add(layeredPane);
-
+        new Timer(1000, e -> {
+            try{
+                FileOutputStream fos = new FileOutputStream(new File("data.txt"));
+                fos.write(a.getText().getBytes());
+            }
+            catch(Exception e) {
+            }
+            a.setText(String.valueOf(Integer.parseInt(a.getText())+1));
+        });
         //c.add(assetlayer);
         setVisible(true);
         setTitle(getshakespearepoem.getshakespearepoem());
