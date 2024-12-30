@@ -3,6 +3,8 @@ import pymysql
 import asyncio
 import time
 import threading
+#import time as datetime
+from datetime import datetime,timedelta
 from playwright.sync_api import Playwright, sync_playwright, expect
 conn = pymysql.connect(host='pcall.kr',user='chatting',password='coxld1234',db='chatting')
 curs = conn.cursor()
@@ -75,18 +77,41 @@ def run(dataset) -> None:
                 fwe = page.evaluate("() => !!document.getElementById('btn_next');")
                 
                 print(fwe)
+                
                 woah = page.locator('a').filter(has=page.locator('img[alt="예약하기"]')).nth(0)
                 woah.wait_for()
                 if fwe is True:
                     raise Exception("lmao")
                 
-                if woah.count() > 0:
-                    print("haha")
-                    woah.click()
-                    page.wait_for_event('dialog')
-                    break
-                else:
+                #if woah.count() > 0:
+                #    print("haha")
+                #    woah.click()
+                #    page.wait_for_event('dialog')
+                #    break
+                #else:
+                thing = page.locator('table[id="tableResult"]').locator('tr')
+                flagthing = True
+                print(thing.count())
+                for i in range(1,thing.count()):
+                    #print(thing.nth(i).locator('td').nth(3).evaluate("a => a.innerHTML").strip().split("<br>")[1],end=" ")
+                    btn = thing.nth(i).locator('td').nth(5)
+                    if btn.evaluate("a => a.innerHTML") == "-":
+                        continue
+                    departtime = datetime.strptime(thing.nth(i).locator('td').nth(2).evaluate("a => a.innerHTML").strip().split("<br>")[1],"%H:%M")
+                    time = datetime.strptime(thing.nth(i).locator('td').nth(3).evaluate("a => a.innerHTML").strip().split("<br>")[1],"%H:%M")
+                    if departtime < datetime.now()+timedelta(minutes=20):
+                        continue
+                    if time.hour < datetime.strptime(thing.nth(i).locator('td').nth(2).evaluate("a => a.innerHTML").strip().split("<br>")[1],"%H:%M").hour:
+                        time += timedelta(days=1)
+                    if time <= datetime.strptime(date[4],"%H"):
+                        flagthing = False
+                        btn.locator('a:has(img[alt="예약하기"])').click()
+                        page.wait_for_event('dialog')
+                        break
+                if flagthing is True:
                     few = page.locator('a:has(img[src="/docs/2007/img/common/btn_next.gif"])').click(timeout=10000)
+                else:
+                    break
                 #aa = page.evaluate("()=>document.querySelector('img[src=\"/docs/2007/img/common/btn_next.gif\"]');")
             except Exception as e:
                 print(e)
@@ -96,10 +121,11 @@ def run(dataset) -> None:
         #input("fewa")
         #time.sleep(5)
         
-        page.wait_for_load_state('load')
+        page.wait_for_selector('table[class="tbl_h"]')
         
         cols = page.locator('table[class="tbl_h"]').nth(1).locator("td")
         wa = "승차일자: i0\n열차번호: i1\n열차종별: i2\n출발역: i3\n출발시각: i4\n도착역: i5\n도착시각: i6\n예약매수: i7\n총결제금액: i8"
+        print(cols.count())
         for i in range(cols.count()):
             a = cols.nth(i).inner_text().replace(" ", "")
             print(i)
