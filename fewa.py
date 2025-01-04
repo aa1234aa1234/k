@@ -10,9 +10,12 @@ conn = pymysql.connect(host='pcall.kr',user='chatting',password='coxld1234',db='
 curs = conn.cursor()
 login_id = ''
 login_pwd= ''
+phone_number = ''
+idx = 0
 
 def run(dataset) -> None:
     date = dataset[3].split('-')
+    date12321 = date[0]+"."+date[1]+"."+date[2]
     def we(a):
             a.accept()
             print(a.message)
@@ -48,8 +51,9 @@ def run(dataset) -> None:
                     return
                 curs.execute(f"DELETE FROM Ticket;")
                 conn.commit()
-                curs.execute(f"INSERT INTO stock.kakaoMsg VALUES (0,'010-3782-2292','{lol}',now());")
+                curs.execute(f"INSERT INTO stock.kakaoMsg VALUES (0,'{phone_number}','{lol}',now());")
                 conn.commit()
+                raise SystemExit
             except Exception as e:
                 print(e,end=" load event")
                 return
@@ -59,25 +63,43 @@ def run(dataset) -> None:
             }}""")
         
         page.on('popup',lambda a: a.close())
-        page.on('frameattached',lambda a: print("cool"))
-        page.on('framedetached', lambda a: print("wowie"))
+        
+        
         
         login()
         test = page.frame(url="https://www.letskorail.com/co/common/popupView.do")
-        page.locator('a[href="javascript:inqSchedule()"]').click()
-        page.wait_for_url('https://www.letskorail.com/ebizprd/EbizPrdTicketPr21111_i1.do')
+        page.wait_for_load_state('domcontentloaded')
+        page.wait_for_selector('a[href="javascript:inqSchedule()"]')
         page.evaluate(f"""document.querySelector('input[name="txtGoStart"]').value=\'{dataset[1]}\';""")
         page.evaluate(f"""document.querySelector('input[name="txtGoEnd"]').value=\'{dataset[2]}\';""")
+        page.evaluate(f"""document.querySelector('input[id="selGoStartDay"]').value=\'{date12321}\';""")
+        page.evaluate(f"""document.querySelector('select[name="selGoHour"]').selectedIndex=\'{date[3]}\';""")
+        page.evaluate(f"""document.querySelector('select[name="txtPsgFlg_1"]').selectedIndex=\'{dataset[4]}\';""")
+        page.locator('a[href="javascript:inqSchedule()"]').click()
+        page.wait_for_url('https://www.letskorail.com/ebizprd/EbizPrdTicketPr21111_i1.do')
+        
         #aa = page.evaluate("""()=> {
         #    return !!document.querySelector('img[src=\"/docs/2007/img/common/btn_next.gif\"]');
         #}""")
         #print(aa)
+
+        def eh(frame):
+            try:
+                a = page.frame_locator('iframe[title="열차안내"]')
+                bt = a.locator('a[onclick="f_close();"]').nth(0)
+                            
+                #frf = page.frame_from_element(frame.element_handle())
+                bt.wait_for(timeout=2000)
+                bt.click()
+            except Exception as e:
+                    print(e)            
         
         page.on("load", bruh)
-        
+        page.on('frameattached',eh)
+        page.on('framedetached', eh)
         while True:
             try:
-                page.wait_for_load_state('load')
+                page.wait_for_load_state('domcontentloaded')
                 
                 
                 
@@ -91,6 +113,7 @@ def run(dataset) -> None:
                 #    page.wait_for_event('dialog')
                 #    break
                 #else:
+                page.wait_for_selector('table[id="tableResult"]')
                 thing = page.locator('table[id="tableResult"]').locator('tr')
                 flagthing = True
                 print(thing.count())
@@ -117,7 +140,7 @@ def run(dataset) -> None:
                     if time <= time2:
                         flagthing = False
                         btn.locator('a:has(img[alt="예약하기"])').click()
-                        frame = page.locator('iframe[title="열차안내"]')
+                        
                         page.wait_for_event('dialog')
                         print(departtime)
                         break
@@ -153,9 +176,11 @@ def run(dataset) -> None:
             if a:
                 wa = wa.replace("i"+str(i),a)
         print(wa)
+        curs.execute(f"UPDATE taskQueue SET done='y' WHERE idx='{idx}';")
+        conn.commit()
         curs.execute(f"DELETE FROM Ticket;")
         conn.commit()
-        curs.execute(f"INSERT INTO stock.kakaoMsg VALUES (0,'010-3782-2292','{wa}',now());")
+        curs.execute(f"INSERT INTO stock.kakaoMsg VALUES (0,'{phone_number}','{wa}',now());")
         conn.commit()
         context.close()
         browser.close()
@@ -164,15 +189,31 @@ def run(dataset) -> None:
 
 
 curs.execute("SELECT * FROM taskQueue")
-row = curs.fetchone()
+row1 = curs.fetchall()
+row = None
+for a in row1:
+    if a[5] == "n":
+        row = a
 curs.execute("SELECT * FROM Ticket")
 b = curs.fetchone()
 if row is not None:
     if b is None:
-        curs.execute(f"INSERT INTO Ticket VALUES (0,'{row[1]}','{row[2]}','{row[3]}');")
+        curs.execute(f"INSERT INTO Ticket VALUES (0,'{row[1]}','{row[2]}','{row[3]}','{row[4]}','{row[5]}');")
         curs.execute("SELECT * FROM account;")
         c = curs.fetchone()
         login_id = c[0]
         login_pwd = c[1]
+        phone_number = row[6]
+        idx = int(row[0])
         conn.commit()
         run(row)
+    if b[5] is == "n":
+        curs.execute("SELECT * FROM account;")
+        c = curs.fetchone()
+        login_id = c[0]
+        login_pwd = c[1]
+        phone_number = row[6]
+        idx = int(row[0])
+        conn.commit()
+        run(row)
+        
