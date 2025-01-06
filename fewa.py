@@ -194,6 +194,7 @@ row = None
 for a in row1:
     if a[5] == "n":
         row = a
+        break
 curs.execute("SELECT * FROM Ticket")
 b = curs.fetchone()
 if row is not None:
@@ -207,13 +208,12 @@ if row is not None:
         idx = int(row[0])
         conn.commit()
         run(row)
-    if b[5] is == "n":
+    elif b[5] == "n":
         curs.execute("SELECT * FROM account;")
         c = curs.fetchone()
         login_id = c[0]
         login_pwd = c[1]
         phone_number = row[6]
         idx = int(row[0])
-        conn.commit()
         run(row)
         
