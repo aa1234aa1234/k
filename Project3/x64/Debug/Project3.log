@@ -1,5 +1,0 @@
-﻿  main.cpp
-D:\.coding\wah\Project3\main.cpp(119,27): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-D:\.coding\wah\Project3\main.cpp(120,29): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-D:\.coding\wah\Project3\main.cpp(260,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  Project3.vcxproj -> D:\.coding\wah\x64\Debug\Project3.exe
