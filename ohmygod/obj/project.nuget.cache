@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "gItfw+hE1Sk=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\sw_303\\Desktop\\수강생107\\김정우\\ohmygod\\ohmygod.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\sw_303\\.nuget\\packages\\interop.uiautomationclient\\10.19041.0\\interop.uiautomationclient.10.19041.0.nupkg.sha512"
+  ],
+  "logs": []
+}
