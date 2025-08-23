@@ -4,6 +4,11 @@ using System.Drawing;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Tesseract;
+using System.Windows.Forms.Automation;
+using FlaUI.Core;
+using FlaUI.UIA3;
+using FlaUI.Core.Input;
+using System.Diagnostics;
 
 namespace ohmygod
 {
@@ -91,6 +96,7 @@ namespace ohmygod
 
         int imageIdx = 0;
         List<Bitmap> images = new List<Bitmap>();
+        List<Bitmap> buttons = new List<Bitmap>();
 
         public Form1()
         {
@@ -100,18 +106,32 @@ namespace ohmygod
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            images.Add(new Bitmap(@".\images\meritz\인증서(1).png"));
-            images.Add(new Bitmap(@".\images\meritz\로그인.png"));
-            images.Add(new Bitmap(@".\images\meritz\현재가.png"));
-            images.Add(new Bitmap(@".\images\meritz\매수.png"));
-            images.Add(new Bitmap(@".\images\meritz\주식매수주문.png"));
-            //while (wnd == IntPtr.Zero)
-            //{
-            //    wnd = FindWindow(null, "메리츠증권 iMeritz XII 로그인");
-            //    //wnd = FindWindow(null, "영웅문4 Login");
-            //    Thread.Sleep(1000);
-            //}
+            images.Add(new Bitmap(@"C:\Users\sw_303\Desktop\수강생107\김정우\ohmygod\images\kiwoom\a.png"));
+            //images.Add(new Bitmap(@".\images\meritz\인증서(1).png"));
+            //images.Add(new Bitmap(@".\images\meritz\로그인.png"));
+            //images.Add(new Bitmap(@".\images\meritz\현재가.png"));
+            //images.Add(new Bitmap(@".\images\meritz\매수.png"));
+            //images.Add(new Bitmap(@".\images\meritz\주식매수주문.png"));
+            if(FindWindow(null,"영웅문4 Login") == IntPtr.Zero && FindWindow(null,"영웅문4") == IntPtr.Zero)
+            {
+                ProcessStartInfo start = new ProcessStartInfo();
+                start.FileName = @"C:\KiwoomHero4\Bin\NKStarter.exe";
+                start.UseShellExecute = true;
+                start.Verb = "runas";
+                try
+                {
+                    Process.Start(start);
+                    while (wnd == IntPtr.Zero) { wnd = FindWindow(null, "영웅문4 Login"); Thread.Sleep(1000); }
+                }
+                catch (Exception ex)
+                {
+
+                }
+            }
+            wnd = FindWindow(null, "영웅문4 Login");
+            wnd = FindWindow(null, "영웅문4") == IntPtr.Zero ? wnd : FindWindow(null,"영웅문4");
             button1.Visible = true;
+            ewfaklwje();
             //new Thread(a).Start();
         }
 
@@ -127,25 +147,38 @@ namespace ohmygod
 
         }
 
-        Rectangle checkImage(Point start, Point end, Vector2 size)
+        void ewfaklwje()
         {
-            Console.WriteLine(end.Y - images[imageIdx].Height);
-            Console.WriteLine(imageIdx);
+            Bitmap aa = new Bitmap(@"C:\Users\sw_303\Desktop\수강생107\김정우\ohmygod\images\kiwoom\awef.png");
+            Graphics few = Graphics.FromImage(aa);
+            buttons.Add(aa.Clone(new Rectangle(0, 0, 51, 40), aa.PixelFormat));
+            buttons.Add(aa.Clone(new Rectangle(51, 0, 51, 40), aa.PixelFormat));
+            for (int i = 2; i<28; i++)
+            {
+                Bitmap a = aa.Clone(new Rectangle(i * 44, 0, 44, 40), aa.PixelFormat);
+                buttons.Add(a);
+            }
+        }
+
+        Rectangle checkImage(Point start, Point end, Vector2 size, Bitmap bitmap)
+        {
+            //Console.WriteLine(end.Y - images[imageIdx].Height);
+            //Console.WriteLine(imageIdx);
             Vector2 screenSize = size;
             using (Bitmap screen = new Bitmap(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height))
             {
                 using (Graphics graphic = Graphics.FromImage(screen))
                 {
                     graphic.CopyFromScreen(new Point(0, 0), Point.Empty, screen.Size);
-                    for (int i = start.X; i < end.X - images[imageIdx].Width; i++)
+                    for (int i = start.X; i < end.X - bitmap.Width; i++)
                     {
-                        for (int j = start.Y; j < end.Y - images[imageIdx].Height; j++)
+                        for (int j = start.Y; j < end.Y - bitmap.Height; j++)
                         {
-                            if (check(screen, i, j))
+                            if (check(screen, i, j, bitmap))
                             {
                                 int a = imageIdx;
                                 imageIdx++;
-                                return new Rectangle(i, j, images[a].Width, images[a].Height);
+                                return new Rectangle(i, j, bitmap.Width, bitmap.Height);
                             }
                         }
                     }
@@ -155,13 +188,14 @@ namespace ohmygod
             return new Rectangle(-1, -1, -1, -1);
         }
 
-        bool check(Bitmap screen, int x, int y)
+        bool check(Bitmap screen, int x, int y, Bitmap bitmap)
         {
-            for (int i = 0; i < images[imageIdx].Width; i++)
+            for (int i = 0; i < bitmap.Width; i++)
             {
-                for (int j = 0; j < images[imageIdx].Height; j++)
+                for (int j = 0; j < bitmap.Height; j++)
                 {
-                    if (images[imageIdx].GetPixel(i, j) != screen.GetPixel(i + x, j + y)) { return false; }
+                    if (bitmap.GetPixel(i, j).A == 0) continue;
+                    if (bitmap.GetPixel(i, j) != screen.GetPixel(i + x, j + y)) { return false; }
                 }
             }
             return true;
@@ -224,114 +258,63 @@ namespace ohmygod
             Console.WriteLine("Button clicked!");
         }
 
-        private void click(Point point)
+        private async Task click(Point point)
         {
             SetCursorPos(point.X, point.Y);
-            mouse_event(MOUSEEVENTF_LEFTDOWN, (uint)point.X, (uint)point.Y, 0, 0);
-            mouse_event(MOUSEEVENTF_LEFTUP, (uint)point.X, (uint)point.Y, 0, 0);
+            Thread.Sleep(100);
+            Mouse.LeftClick(point);
         }
 
-        private void run()
+        
+        private async Task clearscreen()
         {
             RECT rect;
-            switch (imageIdx)
+            SetForegroundWindow(wnd);
+            SetFocus(wnd);
+            GetWindowRect(wnd, out rect);
+            Rectangle rectangle;
+            while ((rectangle = checkImage(new Point(rect.Left, rect.Top), new Point(rect.Right, rect.Bottom), new Vector2(rect.Right - rect.Left, rect.Bottom - rect.Top),images[0])).X != -1)
             {
-                case 0:
-                    SetForegroundWindow(wnd);
-                    SetFocus(wnd);
-                    GetWindowRect(wnd, out rect);
-                    Rectangle rectangle = checkImage(new Point(rect.Left, rect.Top), new Point(rect.Right, rect.Bottom), new Vector2(rect.Right - rect.Left, rect.Bottom - rect.Top));
-                    if (rectangle.X == -1)
-                    {
-                        textBox1.Text += "ewfawe\n";
-                        return;
-                    }
-                    SetForegroundWindow(wnd);
-                    SetFocus(wnd);
-
-                    click(new Point(rectangle.X + rectangle.Width / 2, rectangle.Y + rectangle.Height / 2));
-                    break;
-                case 1:
-                    SetForegroundWindow(wnd);
-                    SetFocus(wnd);
-                    GetWindowRect(wnd, out rect);
-                    rectangle = checkImage(new Point(rect.Left, rect.Top), new Point(rect.Right, rect.Bottom), new Vector2(rect.Right - rect.Left, rect.Bottom - rect.Top));
-                    if (rectangle.X == -1)
-                    {
-                        textBox1.Text += "ewfawe\n";
-                        return;
-                    }
-                    SetForegroundWindow(wnd);
-                    SetFocus(wnd);
-
-                    click(new Point(rectangle.X + rectangle.Width / 2, rectangle.Y + rectangle.Height / 2));
-                    break;
-                case 2:
-                    wnd = IntPtr.Zero;
-                    while (wnd == IntPtr.Zero)
-                    {
-                        wnd = FindWindow(null, "iMeritz");
-                        Thread.Sleep(1000);
-                    }
-                    SetForegroundWindow(wnd);
-                    SetFocus(wnd);
-                    GetWindowRect(wnd, out rect);
-                    rectangle = checkImage(new Point(rect.Left, rect.Top), new Point(rect.Right, rect.Bottom), new Vector2(rect.Right - rect.Left, rect.Bottom - rect.Top));
-                    if (rectangle.X == -1)
-                    {
-                        textBox1.Text += "ewfawe\n";
-                        return;
-                    }
-                    SetForegroundWindow(wnd);
-                    SetFocus(wnd);
-
-                    click(new Point(rectangle.X + rectangle.Width / 2, rectangle.Y + rectangle.Height / 2));
-                    break;
-                case 3:
-                    SetForegroundWindow(wnd);
-                    SetFocus(wnd);
-                    GetWindowRect(wnd, out rect);
-                    rectangle = checkImage(new Point(rect.Left, rect.Top), new Point(rect.Right, rect.Bottom), new Vector2(rect.Right - rect.Left, rect.Bottom - rect.Top));
-                    if (rectangle.X == -1)
-                    {
-                        textBox1.Text += "ewfawe";
-                        return;
-                    }
-                    SetForegroundWindow(wnd);
-                    SetFocus(wnd);
-
-                    click(new Point(rectangle.X + rectangle.Width / 2, rectangle.Y + rectangle.Height / 2));
-                    break;
-                case 4:
-                    SetForegroundWindow(wnd);
-                    SetFocus(wnd);
-                    GetWindowRect(wnd, out rect);
-                    rectangle = checkImage(new Point(rect.Left, rect.Top), new Point(rect.Right, rect.Bottom), new Vector2(rect.Right - rect.Left, rect.Bottom - rect.Top));
-                    if (rectangle.X == -1)
-                    {
-                        textBox1.Text += "ewfawe\n";
-                        return;
-                    }
-                    SetForegroundWindow(wnd);
-                    SetFocus(wnd);
-
-                    click(new Point(rectangle.X, rectangle.Y + rectangle.Height * 2));
-                    break;
+                Console.WriteLine(rectangle.X + " " + rectangle.Y);
+                SetForegroundWindow(wnd);
+                SetFocus(wnd);
+                await click(new Point(rectangle.X + rectangle.Width / 2, rectangle.Y + rectangle.Height / 2));
+                imageIdx = 0;
+                Task.Delay(2000);
             }
-
-
-            return;
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void main()
         {
-            TesseractEngine t = new TesseractEngine("./tessdata", "kor", EngineMode.Default);
-            t.SetVariable("tessedit_char_whitelist", "-01234567890");
-            Console.WriteLine(t.Process(Pix.LoadFromFile("C:\\Users\\sw_303\\Desktop\\cap.png"), PageSegMode.SingleBlock).GetText());
+            RECT rect;
+            Rectangle rectangle;
+            SetForegroundWindow(wnd);
+            SetFocus(wnd);
+            GetWindowRect(wnd, out rect);
+            rectangle = checkImage(new Point(rect.Left, rect.Top), new Point(rect.Right, rect.Bottom), new Vector2(rect.Right - rect.Left, rect.Bottom - rect.Top), buttons[4]);
+            if (rectangle.X == -1)
+            {
+                textBox1.Text += "ewfawe\n";
+                return;
+            }
+            SetForegroundWindow(wnd);
+            SetFocus(wnd);
+
+            click(new Point(rectangle.X + rectangle.Width/2, rectangle.Y + rectangle.Height/2));
+        }
+
+        private async void button1_Click(object sender, EventArgs e)
+        {
+            await Task.Run(() => { clearscreen(); });
+            await Task.Run(() => { main(); });
+            
+            //TesseractEngine t = new TesseractEngine("./tessdata", "kor", EngineMode.Default);
+            //t.SetVariable("tessedit_char_whitelist", "-01234567890");
+            //Console.WriteLine(t.Process(Pix.LoadFromFile("C:\\Users\\sw_303\\Desktop\\cap.png"), PageSegMode.SingleBlock).GetText());
             //button1.Enabled = false;
             //run();
             //timer1.Start();
-            
+
 
             //if (GetWindowRect(wnd, out rect))
             //{
@@ -365,8 +348,6 @@ namespace ohmygod
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            run();
         }
     }
 }
-
