@@ -1,0 +1,4 @@
+            if (!nodes[i]->parent->expanded)
+            {
+                i+=sum(1,nodes.size()-1,1,segmentIndex[i+1].start, segmentIndex[i+1].end);
+            }
